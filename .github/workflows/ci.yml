@@ -1,0 +1,34 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.12
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+  smoke:
+    strategy:
+      matrix:
+        flavor: [roblox-ts, luau-wally]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.12
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npx tsx src/__tests__/smoke/rojo-smoke.ts ${{ matrix.flavor }}
