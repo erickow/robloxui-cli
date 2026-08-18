@@ -124,6 +124,29 @@ describe("init command", () => {
       expect(rojo).toContain("out/server");
     });
 
+    it("maps the standard Roblox services and shared folder", async () => {
+      await runInitCommand(tempDir);
+
+      const rojo = fs.readFileSync(
+        path.join(tempDir, "my-app", "default.project.json"),
+        "utf-8"
+      );
+      for (const service of [
+        "Lighting",
+        "ServerStorage",
+        "SoundService",
+        "StarterGui",
+        "StarterPack",
+        "StarterCharacterScripts",
+      ]) {
+        expect(rojo).toContain(service);
+      }
+      expect(rojo).toContain("out/shared");
+      expect(
+        fs.existsSync(path.join(tempDir, "my-app", "src", "shared", "index.ts"))
+      ).toBe(true);
+    });
+
     it("scaffolds an empty project without sample or demo files", async () => {
       const exitCode = await runInitCommand(tempDir);
       expect(exitCode).toBe(0);
@@ -224,6 +247,33 @@ describe("init command", () => {
       expect(
         fs.existsSync(path.join(projectDir, DEFAULT_COMPONENTS_PATH, "SampleButton.luau"))
       ).toBe(false);
+    });
+
+    it("maps the standard Roblox services, shared, and server folders", async () => {
+      await runInitCommand(tempDir);
+
+      const projectDir = path.join(tempDir, "my-app");
+      const rojo = fs.readFileSync(
+        path.join(projectDir, "default.project.json"),
+        "utf-8"
+      );
+      for (const service of [
+        "Lighting",
+        "ServerScriptService",
+        "ServerStorage",
+        "SoundService",
+        "StarterGui",
+        "StarterPack",
+        "StarterCharacterScripts",
+      ]) {
+        expect(rojo).toContain(service);
+      }
+      expect(rojo).toContain("src/shared");
+      expect(rojo).toContain("src/server");
+      expect(fs.existsSync(path.join(projectDir, "src", "shared", "init.luau"))).toBe(true);
+      expect(
+        fs.existsSync(path.join(projectDir, "src", "server", "spawn.server.luau"))
+      ).toBe(true);
     });
 
     it("does not declare a theme dependency in wally.toml", async () => {

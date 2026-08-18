@@ -54,6 +54,24 @@ export interface InitOptions {
   mcpTools?: McpToolName[];
 }
 
+const EMPTY_SHARED_TS = `export {};
+`;
+
+const SPAWN_SERVER_LUAU = `local Workspace = game:GetService("Workspace")
+
+local spawn = Instance.new("SpawnLocation")
+spawn.Name = "Spawn"
+spawn.Neutral = true
+spawn.Anchored = true
+spawn.Size = Vector3.new(1, 1, 1)
+spawn.Position = Vector3.new(0, 10, 0)
+spawn.Parent = Workspace
+`;
+
+const EMPTY_SHARED_LUAU = `-- Shared modules usable from both client and server
+return {}
+`;
+
 const SPAWN_SERVER_TS = `import { Workspace } from "@rbxts/services";
 
 const spawn = new Instance("SpawnLocation");
@@ -65,7 +83,9 @@ spawn.Position = new Vector3(0, 10, 0);
 spawn.Parent = Workspace;
 `;
 
-const EMPTY_APP_TSX = `export function App() {
+const EMPTY_APP_TSX = `import React from "@rbxts/react";
+
+export function App() {
 	return <></>;
 }
 `;
@@ -336,6 +356,11 @@ function isDirectoryEmpty(dir: string): boolean {
   return fs.readdirSync(dir).length === 0;
 }
 
+/**
+ * Standard DataModel services every Roblox place ships with (baseplate set).
+ * Mapping them explicitly keeps the Rojo-built place identical to Studio's
+ * default template, so scripts and assets can be added to any of them.
+ */
 function buildRobloxTsRojoConfig(projectName: string): string {
   return JSON.stringify(
     {
@@ -343,6 +368,7 @@ function buildRobloxTsRojoConfig(projectName: string): string {
       globIgnorePaths: ["**/*.spec.ts", "**/*.spec.tsx"],
       tree: {
         $className: "DataModel",
+        Lighting: { $className: "Lighting" },
         ReplicatedStorage: {
           $className: "ReplicatedStorage",
           rbxts_include: {
@@ -352,21 +378,27 @@ function buildRobloxTsRojoConfig(projectName: string): string {
               "@rbxts": { $path: "node_modules/@rbxts" },
             },
           },
+          Shared: { $path: "out/shared" },
         },
-        Workspace: {
-          $className: "Workspace",
-          Spawn: { $className: "SpawnLocation" },
+        ServerScriptService: {
+          $className: "ServerScriptService",
+          TS: { $path: "out/server" },
         },
+        ServerStorage: { $className: "ServerStorage" },
+        SoundService: { $className: "SoundService" },
+        StarterGui: { $className: "StarterGui" },
+        StarterPack: { $className: "StarterPack" },
         StarterPlayer: {
           $className: "StarterPlayer",
+          StarterCharacterScripts: { $className: "StarterCharacterScripts" },
           StarterPlayerScripts: {
             $className: "StarterPlayerScripts",
             TS: { $path: "out/client" },
           },
         },
-        ServerScriptService: {
-          $className: "ServerScriptService",
-          TS: { $path: "out/server" },
+        Workspace: {
+          $className: "Workspace",
+          Spawn: { $className: "SpawnLocation" },
         },
       },
     },
@@ -381,20 +413,31 @@ function buildLuauRojoConfig(projectName: string): string {
       name: projectName,
       tree: {
         $className: "DataModel",
+        Lighting: { $className: "Lighting" },
         ReplicatedStorage: {
           $className: "ReplicatedStorage",
           Packages: { $path: "Packages" },
+          Shared: { $path: "src/shared" },
         },
-        Workspace: {
-          $className: "Workspace",
-          Spawn: { $className: "SpawnLocation" },
+        ServerScriptService: {
+          $className: "ServerScriptService",
+          Server: { $path: "src/server" },
         },
+        ServerStorage: { $className: "ServerStorage" },
+        SoundService: { $className: "SoundService" },
+        StarterGui: { $className: "StarterGui" },
+        StarterPack: { $className: "StarterPack" },
         StarterPlayer: {
           $className: "StarterPlayer",
+          StarterCharacterScripts: { $className: "StarterCharacterScripts" },
           StarterPlayerScripts: {
             $className: "StarterPlayerScripts",
             Client: { $path: "src/client" },
           },
+        },
+        Workspace: {
+          $className: "Workspace",
+          Spawn: { $className: "SpawnLocation" },
         },
       },
     },
@@ -595,6 +638,7 @@ function scaffoldRobloxTs(
   if (includeTheme) {
     writeFile(targetDir, "src/client/ui/theme/theme.ts", readBundledThemeFile("index.ts"));
   }
+  writeFile(targetDir, "src/shared/index.ts", EMPTY_SHARED_TS);
   writeFile(targetDir, "src/server/spawn.server.ts", SPAWN_SERVER_TS);
   writeFile(targetDir, `${DEFAULT_COMPONENTS_PATH}/.gitkeep`, "");
 }
@@ -610,6 +654,8 @@ function scaffoldLuauWally(targetDir: string, projectName: string): void {
   writeFile(targetDir, "scripts/studio-dev.mjs", renderStudioDevScript("luau-wally"));
   writeFile(targetDir, "src/client/init.client.luau", INIT_CLIENT_LUAU);
   writeFile(targetDir, "src/client/ui/App.luau", EMPTY_APP_LUAU);
+  writeFile(targetDir, "src/shared/init.luau", EMPTY_SHARED_LUAU);
+  writeFile(targetDir, "src/server/spawn.server.luau", SPAWN_SERVER_LUAU);
   writeFile(targetDir, `${DEFAULT_COMPONENTS_PATH}/.gitkeep`, "");
 }
 

@@ -64,6 +64,7 @@ function getAtPath(tree: Record<string, unknown>, atPath: string[]): unknown {
 function robloxTsRojoTree(): Record<string, unknown> {
   return {
     $className: "DataModel",
+    Lighting: { $className: "Lighting" },
     ReplicatedStorage: {
       $className: "ReplicatedStorage",
       rbxts_include: {
@@ -73,9 +74,19 @@ function robloxTsRojoTree(): Record<string, unknown> {
           "@rbxts": { $path: "node_modules/@rbxts" },
         },
       },
+      Shared: { $path: "out/shared" },
     },
+    ServerScriptService: {
+      $className: "ServerScriptService",
+      TS: { $path: "out/server" },
+    },
+    ServerStorage: { $className: "ServerStorage" },
+    SoundService: { $className: "SoundService" },
+    StarterGui: { $className: "StarterGui" },
+    StarterPack: { $className: "StarterPack" },
     StarterPlayer: {
       $className: "StarterPlayer",
+      StarterCharacterScripts: { $className: "StarterCharacterScripts" },
       StarterPlayerScripts: {
         $className: "StarterPlayerScripts",
         TS: { $path: "out/client" },
@@ -87,12 +98,23 @@ function robloxTsRojoTree(): Record<string, unknown> {
 function luauRojoTree(): Record<string, unknown> {
   return {
     $className: "DataModel",
+    Lighting: { $className: "Lighting" },
     ReplicatedStorage: {
       $className: "ReplicatedStorage",
       Packages: { $path: "Packages" },
+      Shared: { $path: "src/shared" },
     },
+    ServerScriptService: {
+      $className: "ServerScriptService",
+      Server: { $path: "src/server" },
+    },
+    ServerStorage: { $className: "ServerStorage" },
+    SoundService: { $className: "SoundService" },
+    StarterGui: { $className: "StarterGui" },
+    StarterPack: { $className: "StarterPack" },
     StarterPlayer: {
       $className: "StarterPlayer",
+      StarterCharacterScripts: { $className: "StarterCharacterScripts" },
       StarterPlayerScripts: {
         $className: "StarterPlayerScripts",
         Client: { $path: "src/client" },
